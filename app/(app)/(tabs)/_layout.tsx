@@ -3,7 +3,6 @@ import { ActivityRecordProvider } from "@/features/activity/context/ActivityReco
 import { DailyBurnProvider } from "@/features/activity/context/DailyBurnContext";
 import { UserActivityProvider } from "@/features/activity/context/UserActivityContext";
 import { WaterIntakeProvider } from "@/features/hydration/context/WaterIntakeContext";
-import { MessengerProvider } from "@/features/messenger/context/MessengerContext";
 import { ConsumptionRecordProvider } from "@/features/nutrition/context/ConsumptionRecordContext";
 import { FoodProvider } from "@/features/nutrition/context/FoodContext";
 import { MealProvider } from "@/features/nutrition/context/MealContext";
@@ -17,7 +16,6 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { PlatformPressable } from "@react-navigation/elements";
 import { Tabs } from "expo-router";
 import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const screenConfigs: Record<string, IconItem> = {
   home: { name: "home", library: "MaterialIcons" },
@@ -44,51 +42,45 @@ export default function TabLayout() {
                         <ConsumptionRecordProvider>
                           <WaterIntakeProvider>
                             <DailyBurnProvider>
-                              <MessengerProvider>
-                                <SafeAreaView
-                                  edges={["top"]}
-                                  style={{ backgroundColor: theme.surface }}
-                                ></SafeAreaView>
-                                <Tabs
-                                  screenOptions={({ route }) => {
-                                    const config = screenConfigs[route.name];
-                                    return {
-                                      headerShown: false,
-                                      tabBarShowLabel: false,
-                                      tabBarActiveTintColor: theme.primary,
-                                      tabBarInactiveTintColor: theme.onSurface,
-                                      tabBarStyle: {
-                                        backgroundColor: theme.surfaceContainer,
-                                        borderTopWidth: 0,
-                                        height: 64 + 24,
-                                      },
-                                      tabBarIconStyle: styles.tabBarIcon,
-                                      tabBarButton: (props) => (
-                                        <PlatformPressable
-                                          {...props}
-                                          android_ripple={{
-                                            color: "transparent",
-                                          }}
-                                        />
-                                      ),
-                                      tabBarIcon: (props) => (
-                                        <DynamicIcon
-                                          name={config.name}
-                                          size={32}
-                                          library={config.library}
-                                          color={props.color}
-                                        />
-                                      ),
-                                    };
-                                  }}
-                                >
-                                  <Tabs.Screen name="home" />
-                                  <Tabs.Screen name="overview" />
-                                  <Tabs.Screen name="statistics" />
-                                  <Tabs.Screen name="messenger" />
-                                  <Tabs.Screen name="profile" />
-                                </Tabs>
-                              </MessengerProvider>
+                              <Tabs
+                                screenOptions={({ route }) => {
+                                  const config = screenConfigs[route.name];
+                                  return {
+                                    headerShown: false,
+                                    tabBarShowLabel: false,
+                                    tabBarActiveTintColor: theme.primary,
+                                    tabBarInactiveTintColor: theme.onSurface,
+                                    tabBarStyle: {
+                                      backgroundColor: theme.surfaceContainer,
+                                      borderTopWidth: 0,
+                                      height: 64 + 24,
+                                    },
+                                    tabBarIconStyle: styles.tabBarIcon,
+                                    tabBarButton: (props) => (
+                                      <PlatformPressable
+                                        {...props}
+                                        android_ripple={{
+                                          color: "transparent",
+                                        }}
+                                      />
+                                    ),
+                                    tabBarIcon: (props) => (
+                                      <DynamicIcon
+                                        name={config.name}
+                                        size={32}
+                                        library={config.library}
+                                        color={props.color}
+                                      />
+                                    ),
+                                  };
+                                }}
+                              >
+                                <Tabs.Screen name="home" />
+                                <Tabs.Screen name="overview" />
+                                <Tabs.Screen name="statistics" />
+                                <Tabs.Screen name="messenger" />
+                                <Tabs.Screen name="profile" />
+                              </Tabs>
                             </DailyBurnProvider>
                           </WaterIntakeProvider>
                         </ConsumptionRecordProvider>

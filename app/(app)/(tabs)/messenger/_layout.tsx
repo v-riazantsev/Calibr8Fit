@@ -5,7 +5,6 @@ export default function MessengerStack() {
   return (
     <Stack>
       <Stack.Screen name="chatList" options={{ headerShown: false }} />
-      <Stack.Screen name="[chatId]" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -21,7 +21,7 @@ export default function AuthNavigationProvider() {
       if (authenticated) {
         if (registrationComplete) {
           console.log("Root layout - Navigating to tabs");
-          router.replace("/(tabs)/home");
+          router.replace("/(app)/(tabs)/home");
         } else {
           console.log("Root layout - Navigating to profile setup");
           router.push("/(auth)/user-info");

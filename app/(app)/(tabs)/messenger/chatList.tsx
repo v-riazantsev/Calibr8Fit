@@ -32,7 +32,7 @@ export default function ChatList() {
   }, [fetchChats]);
 
   const handleChatCardPress = useCallback((chatId: string) => {
-    router.push(`/messenger/${chatId}`);
+    router.push(`/(app)/${chatId}`);
   }, []);
 
   return (
