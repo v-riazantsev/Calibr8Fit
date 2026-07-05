@@ -1,9 +1,13 @@
-import { UserSummary } from "@/features/social";
+import { ChatMessagePreview } from "./chatMessage";
 
-export interface Chat {
+export interface ChatPreview {
   id: string;
+  displayName: string;
   isGroupChat: boolean;
-  name?: string;
+  avatarUrl?: string;
   createdAt: Date;
-  members: UserSummary[];
+  memberCount: number;
+  lastMessage?: ChatMessagePreview;
+  lastReadMessageId?: string;
+  unreadMessagesCount: number;
 }

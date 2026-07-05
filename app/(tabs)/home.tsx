@@ -18,13 +18,10 @@ import AppText from "@/shared/components/AppText";
 import IconAddProgressIndicator from "@/shared/components/IconAddProgressIndicator";
 import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
 import Popup from "@/shared/components/Popup";
-import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function Home() {
-  const theme = useTheme();
-
   const [popupContent, setPopupContent] = useState<React.ReactNode>();
 
   const openFoodPopup = useCallback(() => {

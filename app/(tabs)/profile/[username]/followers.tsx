@@ -11,7 +11,7 @@ export default function Followers() {
   const { searchFollowers } = useFollowers();
 
   const handleUserPress = useCallback(async (username: string) => {
-    if (username === profileSettings?.username)
+    if (username === profileSettings?.userName)
       router.push('/profile/myProfile');
     else
       router.push(`/profile/${username}`);
@@ -19,8 +19,7 @@ export default function Followers() {
 
   return (
     <UserSearchScreen
-      loadPage={(query, page, pageSize) => searchFollowers(username as string, query, page, pageSize)}
-      pageSize={10}
+      loadPage={(query, page, pageSize) => searchFollowers(username as string, query, page, 10)}
       onUserPress={handleUserPress}
     />
   );

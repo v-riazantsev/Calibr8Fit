@@ -13,23 +13,22 @@ export default function Friends({
   const { searchUserFriends } = useFriends();
 
   const { username: usernameParam } = useLocalSearchParams();
-  const username = isCurrentUser ? profileSettings?.username : usernameParam;
+  const username = isCurrentUser ? profileSettings?.userName : usernameParam;
 
   const handleUserPress = useCallback(
     async (username: string) => {
-      if (username === profileSettings?.username)
+      if (username === profileSettings?.userName)
         router.push("/profile/myProfile");
       else router.push(`/profile/${username}`);
     },
-    [profileSettings?.username],
+    [profileSettings?.userName],
   );
 
   return (
     <UserSearchScreen
-      loadPage={(query, page, pageSize) =>
-        searchUserFriends(username as string, query, page, pageSize)
+      loadPage={(query, page, _) =>
+        searchUserFriends(username as string, query, page, 10)
       }
-      pageSize={10}
       onUserPress={handleUserPress}
     />
   );

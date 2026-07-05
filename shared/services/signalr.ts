@@ -26,10 +26,17 @@ export function createHub({ endpoint }: HubConfig) {
 
   async function connect() {
     const conn = getConnection();
+
     if (conn.state === signalR.HubConnectionState.Connected) {
       console.warn("Already connected to hub:", endpoint);
       return;
     }
+
+    if (conn.state !== signalR.HubConnectionState.Disconnected) {
+      console.warn("Hub is not disconnected. Current state:", conn.state);
+      return;
+    }
+
     await conn.start();
     console.log("Connected to hub:", endpoint);
   }

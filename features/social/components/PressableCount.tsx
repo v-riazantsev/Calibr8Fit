@@ -1,4 +1,5 @@
 import AppText from "@/shared/components/AppText";
+import NotificationBadge from "@/shared/components/NotificationBadge";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback, useMemo } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
@@ -32,13 +33,7 @@ export default function PressableCount({
       <View>
         <View style={styles.countRow}>
           <AppText type="body-medium-bold">{count}</AppText>
-          {(notificationCount ?? 0) > 0 && (
-            <AppText
-              type="body-medium-bold"
-              color="onPrimary"
-              style={[styles.badge, { backgroundColor: theme.error }]}
-            >{`+${notificationCount}`}</AppText>
-          )}
+          <NotificationBadge text={(notificationCount ?? 0) > 0 ? notificationCount!.toString() : undefined} />
         </View>
         <AppText
           type="body-medium"
@@ -57,9 +52,5 @@ const styles = StyleSheet.create({
   countRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  badge: {
-    borderRadius: 100,
-    paddingHorizontal: 2,
   },
 });
