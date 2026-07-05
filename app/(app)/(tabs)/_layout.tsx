@@ -7,7 +7,6 @@ import { ConsumptionRecordProvider } from "@/features/nutrition/context/Consumpt
 import { FoodProvider } from "@/features/nutrition/context/FoodContext";
 import { MealProvider } from "@/features/nutrition/context/MealContext";
 import { UserFoodProvider } from "@/features/nutrition/context/UserFoodContext";
-import { ProfileProvider } from "@/features/profile/context/ProfileContext";
 import { RecommendationsProvider } from "@/features/profile/context/RecommendationsContext";
 import { SocialProvider } from "@/features/social";
 import { WeightRecordProvider } from "@/features/weight/context/WeightRecordContext";
@@ -29,71 +28,69 @@ export default function TabLayout() {
   const theme = useTheme();
 
   return (
-    <ProfileProvider>
-      <SocialProvider>
-        <WeightRecordProvider>
-          <RecommendationsProvider>
-            <ActivityProvider>
-              <UserActivityProvider>
-                <ActivityRecordProvider>
-                  <FoodProvider>
-                    <UserFoodProvider>
-                      <MealProvider>
-                        <ConsumptionRecordProvider>
-                          <WaterIntakeProvider>
-                            <DailyBurnProvider>
-                              <Tabs
-                                screenOptions={({ route }) => {
-                                  const config = screenConfigs[route.name];
-                                  return {
-                                    headerShown: false,
-                                    tabBarShowLabel: false,
-                                    tabBarActiveTintColor: theme.primary,
-                                    tabBarInactiveTintColor: theme.onSurface,
-                                    tabBarStyle: {
-                                      backgroundColor: theme.surfaceContainer,
-                                      borderTopWidth: 0,
-                                      height: 64 + 24,
-                                    },
-                                    tabBarIconStyle: styles.tabBarIcon,
-                                    tabBarButton: (props) => (
-                                      <PlatformPressable
-                                        {...props}
-                                        android_ripple={{
-                                          color: "transparent",
-                                        }}
-                                      />
-                                    ),
-                                    tabBarIcon: (props) => (
-                                      <DynamicIcon
-                                        name={config.name}
-                                        size={32}
-                                        library={config.library}
-                                        color={props.color}
-                                      />
-                                    ),
-                                  };
-                                }}
-                              >
-                                <Tabs.Screen name="home" />
-                                <Tabs.Screen name="overview" />
-                                <Tabs.Screen name="statistics" />
-                                <Tabs.Screen name="messenger" />
-                                <Tabs.Screen name="profile" />
-                              </Tabs>
-                            </DailyBurnProvider>
-                          </WaterIntakeProvider>
-                        </ConsumptionRecordProvider>
-                      </MealProvider>
-                    </UserFoodProvider>
-                  </FoodProvider>
-                </ActivityRecordProvider>
-              </UserActivityProvider>
-            </ActivityProvider>
-          </RecommendationsProvider>
-        </WeightRecordProvider>
-      </SocialProvider>
-    </ProfileProvider>
+    <SocialProvider>
+      <WeightRecordProvider>
+        <RecommendationsProvider>
+          <ActivityProvider>
+            <UserActivityProvider>
+              <ActivityRecordProvider>
+                <FoodProvider>
+                  <UserFoodProvider>
+                    <MealProvider>
+                      <ConsumptionRecordProvider>
+                        <WaterIntakeProvider>
+                          <DailyBurnProvider>
+                            <Tabs
+                              screenOptions={({ route }) => {
+                                const config = screenConfigs[route.name];
+                                return {
+                                  headerShown: false,
+                                  tabBarShowLabel: false,
+                                  tabBarActiveTintColor: theme.primary,
+                                  tabBarInactiveTintColor: theme.onSurface,
+                                  tabBarStyle: {
+                                    backgroundColor: theme.surfaceContainer,
+                                    borderTopWidth: 0,
+                                    height: 64 + 24,
+                                  },
+                                  tabBarIconStyle: styles.tabBarIcon,
+                                  tabBarButton: (props) => (
+                                    <PlatformPressable
+                                      {...props}
+                                      android_ripple={{
+                                        color: "transparent",
+                                      }}
+                                    />
+                                  ),
+                                  tabBarIcon: (props) => (
+                                    <DynamicIcon
+                                      name={config.name}
+                                      size={32}
+                                      library={config.library}
+                                      color={props.color}
+                                    />
+                                  ),
+                                };
+                              }}
+                            >
+                              <Tabs.Screen name="home" />
+                              <Tabs.Screen name="overview" />
+                              <Tabs.Screen name="statistics" />
+                              <Tabs.Screen name="messenger" />
+                              <Tabs.Screen name="profile" />
+                            </Tabs>
+                          </DailyBurnProvider>
+                        </WaterIntakeProvider>
+                      </ConsumptionRecordProvider>
+                    </MealProvider>
+                  </UserFoodProvider>
+                </FoodProvider>
+              </ActivityRecordProvider>
+            </UserActivityProvider>
+          </ActivityProvider>
+        </RecommendationsProvider>
+      </WeightRecordProvider>
+    </SocialProvider>
   );
 }
 

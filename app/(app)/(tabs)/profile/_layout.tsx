@@ -9,7 +9,6 @@ export default function ProfileStack() {
       <Stack.Screen name="friendRequests" options={{ headerShown: false }} />
       <Stack.Screen name="userSearch" options={{ headerShown: false }} />
       <Stack.Screen name="[username]" options={{ headerShown: false }} />
-      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );
 }
