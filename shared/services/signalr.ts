@@ -28,7 +28,7 @@ export function createHub({ endpoint }: HubConfig) {
     const conn = getConnection();
 
     if (conn.state === signalR.HubConnectionState.Connected) {
-      console.warn("Already connected to hub:", endpoint);
+      console.log("Already connected to hub:", endpoint);
       return;
     }
 

@@ -7,7 +7,7 @@ import { FlatList, StyleSheet } from "react-native";
 
 export default function ChatList() {
   const theme = useTheme();
-  const { chatPreviews, fetchChatPreviews: fetchChats, messagesByChatId, fetchChatMessages, sendMessage } = useMessenger();
+  const { chatPreviews, fetchChatPreviews: fetchChats, fetchChatMessages, sendMessage } = useMessenger();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -51,6 +51,7 @@ export default function ChatList() {
     />
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

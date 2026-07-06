@@ -18,3 +18,10 @@ export interface ChatMessagePreview {
   isOwnMessage: boolean;
   isRead: boolean;
 }
+
+export interface SendChatMessageRequestDto {
+  id?: string;
+  chatId: string;
+  content: string;
+  sentAt?: Date;
+}

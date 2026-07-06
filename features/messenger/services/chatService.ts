@@ -2,7 +2,7 @@ import { api } from "@/shared/services/api";
 import { ChatPreview } from "../types/chat";
 import { ChatMessage, ChatMessagePreview } from "../types/chatMessage";
 
-const mapChatMessageDtoToChatMessage = (dto: any): any => ({
+const mapChatMessageDtoToChatMessage = (dto: any): ChatMessage => ({
   ...dto,
   // sender: {
   //   ...dto.sender
@@ -47,10 +47,21 @@ const fetchChatMessages = async (
   before?: string,
   size: number = 100,
 ): Promise<ChatMessage[]> => {
+  const query = new URLSearchParams({
+    chatId,
+    size: size.toString(),
+  });
+
+  if (before) {
+    query.append("before", before);
+  }
+
   const response = await api.request({
-    endpoint: `/chat/messages?${encodeURIComponent(chatId)}${before ? `&before=${encodeURIComponent(before)}` : ''}&size=${size}`,
+    endpoint: `/chat/messages?${query.toString()}`,
     method: "GET",
   });
+
+  console.log(`/chat/messages?${query.toString()}, response:`, response.length);
 
   return response.map((dto: any) => mapChatMessageDtoToChatMessage(dto));
 }

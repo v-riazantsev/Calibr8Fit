@@ -19,7 +19,7 @@ function ThemedStack() {
         statusBarStyle: theme.isDark ? "light" : "dark",
       }}
     >
-      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(app)" />
       <Stack.Screen name="(auth)" />
     </Stack>
   );
