@@ -18,6 +18,12 @@ export const Typography = StyleSheet.create({
   "body-small": {
     fontSize: 12,
     lineHeight: 16,
+    fontWeight: "400",
+  },
+  "body-small-bold": {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600",
   },
   "headline-medium": {
     fontSize: 28,

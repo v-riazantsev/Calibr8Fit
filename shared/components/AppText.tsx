@@ -1,5 +1,5 @@
 import { Typography } from "@/styles/typography";
-import { StyleProp, Text, TextStyle } from "react-native";
+import { NativeSyntheticEvent, StyleProp, Text, TextLayoutEventData, TextStyle } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 
 type Props = {
@@ -8,6 +8,7 @@ type Props = {
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip";
+  onTextLayout?: (event: NativeSyntheticEvent<TextLayoutEventData>) => void;
   children: React.ReactNode;
 };
 
@@ -16,6 +17,7 @@ export default function AppText({
   color = "onSurface",
   style,
   children,
+  onTextLayout,
   ...props
 }: Props) {
   const theme = useTheme();
@@ -23,6 +25,7 @@ export default function AppText({
   return (
     <Text
       {...props}
+      onTextLayout={onTextLayout}
       style={[
         Typography[type],
         {

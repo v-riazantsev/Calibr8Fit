@@ -4,9 +4,10 @@ import { ChatMessage, ChatMessagePreview } from "../types/chatMessage";
 
 const mapChatMessageDtoToChatMessage = (dto: any): ChatMessage => ({
   ...dto,
-  // sender: {
-  //   ...dto.sender
-  // },
+  sender: {
+    ...dto.sender,
+    username: dto.sender.userName,
+  },
   sentAt: new Date(dto.sentAt),
 });
 

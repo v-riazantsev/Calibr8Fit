@@ -1,3 +1,4 @@
+import ChatMessageBubble from "@/features/messenger/components/ChatMessageBubble";
 import { useMessenger } from "@/features/messenger/hooks/useMessegner";
 import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
@@ -6,14 +7,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   StyleSheet,
-  Text,
   TextInput,
   View
 } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 export default function Chat() {
   const theme = useTheme();
   const { chatId } = useLocalSearchParams<{ chatId: string }>();
+
+  const [input, setInput] = useState("");
 
   const {
     currentChatMessages,
@@ -37,14 +40,13 @@ export default function Chat() {
     };
   }, [chatId]);
 
-  const handleSendMessage = useCallback(
-    async (content: string) => {
-      if (!chatId) return;
+  const handleSendMessage = useCallback(async (content: string) => {
+    if (!chatId) return;
 
-      await sendChatMessage(chatId, content);
-    },
-    [chatId, sendChatMessage]
-  );
+    setInput("");
+
+    await sendChatMessage(chatId, content);
+  }, [chatId, sendChatMessage]);
 
   const invertedMessages = useMemo(() => {
     return [...currentChatMessages].reverse();
@@ -75,7 +77,10 @@ export default function Chat() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.surface }}>
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={{ flex: 1, backgroundColor: theme.surface }}
+    >
       <FlatList
         inverted
         style={{ flex: 1 }}
@@ -83,17 +88,19 @@ export default function Chat() {
         data={invertedMessages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text style={{ color: theme.onSurface }}>{item.content}</Text>
-          </View>
+          <ChatMessageBubble message={item} />
         )}
         onEndReached={loadOlderMessages}
         refreshing={loadingOlder}
       />
-      <View style={styles.inputRow}>
+      <View
+        style={styles.inputRow}
+      >
         <TextInput
           placeholder="Type a message..."
           style={styles.input}
+          value={input}
+          onChangeText={setInput}
         />
         <IconButton
           icon={{
@@ -101,18 +108,18 @@ export default function Chat() {
             library: "MaterialIcons",
             size: 24,
           }}
-          onPress={() => handleSendMessage("Hello!")}
+          onPress={() => handleSendMessage(input)}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 16,
     gap: 8,
+    paddingHorizontal: 4,
   },
   messageBubble: {
     padding: 8,
@@ -128,15 +135,14 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 8,
     marginBottom: 24,
+    gap: 8,
+    padding: 8,
   },
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 8,
-    padding: 8,
-    marginHorizontal: 8,
   },
 });
