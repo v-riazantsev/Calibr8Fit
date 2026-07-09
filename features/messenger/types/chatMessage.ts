@@ -7,17 +7,15 @@ export interface ChatMessage {
   content: string;
   sentAt: Date;
   isOwnMessage: boolean;
-  isReadByUser: boolean;
-  isReadByOthers: boolean;
 }
 
-export interface ChatMessagePreview {
-  senderUsername: string;
-  content: string;
-  sentAt: Date;
-  isOwnMessage: boolean;
-  isRead: boolean;
-}
+// export interface ChatMessagePreview {
+//   senderUsername: string;
+//   content: string;
+//   sentAt: Date;
+//   isOwnMessage: boolean;
+//   isReadByOthers: boolean;
+// }
 
 export interface SendChatMessageRequestDto {
   id?: string;

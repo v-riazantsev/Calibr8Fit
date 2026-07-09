@@ -3,7 +3,7 @@ import * as Crypto from "expo-crypto";
 import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import { chatHubService } from "../services/chatHub";
 import { chatService } from "../services/chatService";
-import { ChatPreview } from "../types/chat";
+import { ChatPreview, ChatReadDto } from "../types/chat";
 import { ChatMessage } from "../types/chatMessage";
 
 interface MessengerContextProps {
@@ -16,6 +16,7 @@ interface MessengerContextProps {
   fetchChatPreviews: () => Promise<ChatPreview[]>;
 
   currentChatMessages: ChatMessage[];
+  currentChatPreview: ChatPreview | undefined;
   fetchChatMessages: (
     chatId: string,
     before?: string,
@@ -48,16 +49,16 @@ export const MessengerProvider = ({
     return messagesByChatId[activeChatId] || [];
   }, [messagesByChatId, activeChatId]);
 
-  const updatePreviewWithMessage = (
-    message: ChatMessage
-  ) => {
+  const currentChatPreview = useMemo(() => {
+    if (!activeChatId) return undefined;
+    return chatPreviews[activeChatId];
+  }, [chatPreviews, activeChatId]);
+
+  const updateChatPreviewLastMessage = (message: ChatMessage) => {
     setChatPreviews(prev => {
       const preview = prev[message.chatId];
 
-      if (!preview) {
-        console.warn(`No chat preview found for chatId: ${message.chatId}`);
-        return prev;
-      }
+      if (!preview) return prev;
 
       const currentLastMessage = preview.lastMessage;
 
@@ -68,21 +69,83 @@ export const MessengerProvider = ({
 
       if (!isNewer) return prev;
 
-      const shouldIncrementUnread =
-        !message.isOwnMessage && !message.isReadByUser;
-
       return {
         ...prev,
         [message.chatId]: {
           ...preview,
-          lastMessage: {
-            senderUsername: message.sender.username,
-            content: message.content,
-            sentAt: message.sentAt,
-            isOwnMessage: message.isOwnMessage,
-            isRead: message.isOwnMessage || message.isReadByUser,
-          },
-          unreadMessagesCount: preview.unreadMessagesCount + (shouldIncrementUnread ? 1 : 0),
+          lastMessage: message,
+        },
+      };
+    });
+  }
+
+  const updateLastReadByUserMessageSentAt = (chatId: string, sentAt: Date) => {
+    setChatPreviews(prev => {
+      const preview = prev[chatId];
+
+      if (!preview) return prev;
+
+      return {
+        ...prev,
+        [chatId]: {
+          ...preview,
+          lastReadByUserMessageSentAt: sentAt,
+        },
+      };
+    });
+  }
+
+  // Keep preview's last message in sync with the messagesByChatId state
+  useEffect(() => {
+    for (const [chatId, messages] of Object.entries(messagesByChatId)) {
+      const lastMessage = messages[messages.length - 1];
+
+      if (lastMessage) {
+        updateChatPreviewLastMessage(lastMessage);
+      }
+    }
+  }, [messagesByChatId]);
+
+  const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
+    const fetchedChatsPreviews = await chatService.fetchChatPreviews();
+
+    setChatPreviews(
+      fetchedChatsPreviews.reduce<Record<string, ChatPreview>>((acc, chat) => {
+        acc[chat.id] = chat;
+        return acc;
+      }, {})
+    );
+
+    return fetchedChatsPreviews;
+  };
+
+  const updateUnreadCount = (chatId: string, change: number) => {
+    setChatPreviews(prev => {
+      const preview = prev[chatId];
+
+      if (!preview) return prev;
+
+      return {
+        ...prev,
+        [chatId]: {
+          ...preview,
+          unreadMessagesCount: Math.max(0, preview.unreadMessagesCount + change),
+        },
+      };
+    });
+  };
+
+  const markPreviewAsRead = (chatId: string) => {
+    setChatPreviews(prev => {
+      const preview = prev[chatId];
+
+      if (!preview) return prev;
+
+      return {
+        ...prev,
+        [chatId]: {
+          ...preview,
+          unreadMessagesCount: 0,
         },
       };
     });
@@ -113,39 +176,20 @@ export const MessengerProvider = ({
       ...prev,
       [chatId]: mergeMessages(prev[chatId] || [], messages),
     }));
-
-    const lastMessage = messages[messages.length - 1];
-    updatePreviewWithMessage(lastMessage);
   };
 
-  const updateMessageInChat = (chatId: string, updatedMessage: ChatMessage) => {
+  const updateMessageInChat = (updatedMessage: ChatMessage) => {
     setMessagesByChatId(prev => {
-      const currentMessages = prev[chatId] || [];
-      const updatedMessages = currentMessages.map(msg =>
-        msg.id === updatedMessage.id ? updatedMessage : msg
-      );
+      const currentMessages = prev[updatedMessage.chatId] || [];
 
       return {
         ...prev,
-        [chatId]: updatedMessages,
+        [updatedMessage.chatId]: currentMessages.map(msg =>
+          msg.id === updatedMessage.id ? updatedMessage : msg
+        ),
       };
     });
-
-    updatePreviewWithMessage(updatedMessage);
-  }
-
-
-  const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
-    const fetchedChatsPreviews = await chatService.fetchChatPreviews();
-
-    // Update the chat preview state
-    setChatPreviews(fetchedChatsPreviews.reduce<Record<string, ChatPreview>>((acc, chat) => {
-      acc[chat.id] = chat;
-      return acc;
-    }, {}));
-
-    return fetchedChatsPreviews;
-  }
+  };
 
   const fetchChatMessages = async (chatId: string, before?: string, size: number = 50): Promise<ChatMessage[]> => {
     const fetchedMessages = await chatService.fetchChatMessages(chatId, before, size);
@@ -158,38 +202,69 @@ export const MessengerProvider = ({
     return fetchedMessages;
   }
 
+  const readChat = async (
+    chatId: string,
+    fromMessage: ChatMessage
+  ): Promise<ChatReadDto | undefined> => {
+    if (fromMessage.isOwnMessage || fromMessage.sentAt <= (chatPreviews[chatId]?.lastReadByUserMessageSentAt || new Date(0)))
+      return undefined;
+
+    let chatReadDto: ChatReadDto;
+    try {
+      chatReadDto = await chatHubService.readMessages(fromMessage.id);
+    } catch (error) {
+      console.error("Error reading messages with id:", fromMessage.id, error);
+      return undefined;
+    }
+
+    updateLastReadByUserMessageSentAt(chatId, new Date(chatReadDto.fromMessageSentAt));
+    markPreviewAsRead(chatId);
+  };
+
+  // TODO: add new event on first message in chat incoming
+  const onMessageIncoming = async (message: ChatMessage) => {
+    const isActiveChat = activeChatIdRef.current === message.chatId;
+
+    addMessagesToChat(message.chatId, [message]);
+
+    if (isActiveChat && !message.isOwnMessage) {
+      await readChat(message.chatId, message);
+      return;
+    }
+
+    if (!message.isOwnMessage) {
+      updateUnreadCount(message.chatId, 1);
+    }
+  };
+
+  const getLatestIncomingMessage = (
+    messages: ChatMessage[]
+  ): ChatMessage | undefined => {
+    return [...messages]
+      .reverse()
+      .find(message => !message.isOwnMessage);
+  };
+
+
   const openChat = async (chatId: string) => {
     setActiveChatId(chatId);
     activeChatIdRef.current = chatId;
 
-    // FIXME: what about already loaded messages? should we fetch them again? 
-    const alreadyLoaded = messagesByChatId[chatId]?.length > 0;
+    const alreadyLoadedMessages = messagesByChatId[chatId] || [];
 
-    if (!alreadyLoaded) {
-      await fetchChatMessages(chatId, undefined, 50);
+    let messages = alreadyLoadedMessages;
+
+    if (messages.length === 0) {
+      messages = await fetchChatMessages(chatId, undefined, 50);
     }
 
-    setChatPreviews(prev => {
-      const preview = prev[chatId];
+    const latestIncomingMessage = getLatestIncomingMessage(messages);
 
-      if (!preview) return prev;
+    if (!latestIncomingMessage) {
+      return;
+    }
 
-      return {
-        ...prev,
-        [chatId]: {
-          ...preview,
-          unreadMessagesCount: 0,
-          lastMessage: preview.lastMessage
-            ? {
-              ...preview.lastMessage,
-              isRead: true,
-            }
-            : preview.lastMessage,
-        },
-      };
-    });
-
-    // await chatService.markChatAsRead(chatId);
+    await readChat(chatId, latestIncomingMessage);
   };
 
   const closeChat = () => {
@@ -198,7 +273,6 @@ export const MessengerProvider = ({
   };
 
   const sendChatMessage = async (chatId: string, content: string) => {
-    // Add the message optimistically to the chat
     const optimisticMessage: ChatMessage = {
       id: Crypto.randomUUID(),
       chatId,
@@ -209,37 +283,20 @@ export const MessengerProvider = ({
       },
       content,
       sentAt: new Date(),
-      isOwnMessage: true,
-      isReadByUser: true,
-      isReadByOthers: false,
+      isOwnMessage: true
     };
 
     addMessagesToChat(chatId, [optimisticMessage]);
+    updateChatPreviewLastMessage(optimisticMessage);
 
     const message = await chatHubService.sendChatMessage({
       id: optimisticMessage.id,
       chatId,
-      content
+      content,
     });
 
-    // Update the message in the chat with the actual data from the server
-    updateMessageInChat(chatId, message);
-  }
-
-  // TODO: add new event on first message in chat incoming
-  const onMessageIncoming = (message: ChatMessage) => {
-    const isActiveChat = activeChatIdRef.current === message.chatId;
-
-    const normalizedMessage: ChatMessage = {
-      ...message,
-      isReadByUser: isActiveChat || message.isReadByUser,
-    };
-
-    addMessagesToChat(normalizedMessage.chatId, [normalizedMessage]);
-
-    if (isActiveChat && !normalizedMessage.isOwnMessage) {
-      // await chatService.markChatAsRead(normalizedMessage.chatId);
-    }
+    updateMessageInChat(message);
+    updateChatPreviewLastMessage(message);
   };
 
   // Hook up the SignalR connection and event handlers
@@ -276,6 +333,7 @@ export const MessengerProvider = ({
         closeChat,
 
         chatPreviews,
+        currentChatPreview,
         fetchChatPreviews,
         currentChatMessages,
         fetchChatMessages,

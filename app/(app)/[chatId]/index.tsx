@@ -1,8 +1,10 @@
 import ChatMessageBubble from "@/features/messenger/components/ChatMessageBubble";
 import { useMessenger } from "@/features/messenger/hooks/useMessegner";
+import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useLocalSearchParams } from "expo-router";
+import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
@@ -23,7 +25,8 @@ export default function Chat() {
     openChat,
     closeChat,
     fetchChatMessages,
-    sendChatMessage
+    sendChatMessage,
+    currentChatPreview
   } = useMessenger();
 
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -81,6 +84,25 @@ export default function Chat() {
       behavior="padding"
       style={{ flex: 1, backgroundColor: theme.surface }}
     >
+      <View style={[styles.headerRow, { borderColor: theme.outline }]}>
+        <IconButton
+          icon={{
+            name: "arrow-back",
+            library: "MaterialIcons",
+            size: 32,
+          }}
+          variant="icon"
+          onPress={router.back}
+        />
+        <Image
+          source={{ uri: currentChatPreview?.avatarUrl }}
+          placeholder={require("@/assets/images/avatar-placeholder.png")}
+          style={styles.avatar}
+        />
+        <AppText type="title-large">
+          {currentChatPreview?.displayName}
+        </AppText>
+      </View>
       <FlatList
         inverted
         style={{ flex: 1 }}
@@ -88,7 +110,10 @@ export default function Chat() {
         data={invertedMessages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ChatMessageBubble message={item} />
+          <ChatMessageBubble
+            message={item}
+            displaySenderName={currentChatPreview?.isGroupChat && !item.isOwnMessage}
+          />
         )}
         onEndReached={loadOlderMessages}
         refreshing={loadingOlder}
@@ -132,6 +157,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  headerRow: {
+    flexDirection: "row",
+    padding: 8,
+    alignItems: "center",
+    gap: 8,
+    borderBottomWidth: 1,
+  },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -144,5 +176,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 8,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginLeft: 8,
   },
 });

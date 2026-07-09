@@ -1,4 +1,5 @@
-import { ChatMessagePreview } from "./chatMessage";
+import { UserSummary } from "@/features/social";
+import { ChatMessage } from "./chatMessage";
 
 export interface ChatPreview {
   id: string;
@@ -7,7 +8,17 @@ export interface ChatPreview {
   avatarUrl?: string;
   createdAt: Date;
   memberCount: number;
-  lastMessage?: ChatMessagePreview;
-  lastReadMessageId?: string;
+  lastMessage?: ChatMessage;
+
+  directMember?: UserSummary;
+  typingUsers: string[];
+
+  lastReadByUserMessageSentAt?: Date;
+  lastReadByOtherMembersMessageSentAt?: Date;
   unreadMessagesCount: number;
+}
+
+export interface ChatReadDto {
+  chatId: string;
+  fromMessageSentAt: string;
 }

@@ -30,6 +30,7 @@ export default function AppText({
         Typography[type],
         {
           color: theme[color],
+          flexShrink: 1,
         },
         style,
       ]}

@@ -1,6 +1,6 @@
 import { api } from "@/shared/services/api";
 import { ChatPreview } from "../types/chat";
-import { ChatMessage, ChatMessagePreview } from "../types/chatMessage";
+import { ChatMessage } from "../types/chatMessage";
 
 const mapChatMessageDtoToChatMessage = (dto: any): ChatMessage => ({
   ...dto,
@@ -17,15 +17,21 @@ const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
     method: "GET",
   });
 
+  console.log("/chat response:", response);
+
   return response.map((dto: any) => ({
     ...dto,
     createdAt: new Date(dto.createdAt),
+    lastReadByUserMessageSentAt:
+      dto.lastReadByUserMessageSentAt ? new Date(dto.lastReadByUserMessageSentAt) : undefined,
+    lastReadByOtherMembersMessageSentAt:
+      dto.lastReadByOtherMembersMessageSentAt ? new Date(dto.lastReadByOtherMembersMessageSentAt) : undefined,
 
     lastMessage: dto.lastMessage
       ? ({
         ...dto.lastMessage,
         sentAt: new Date(dto.lastMessage.sentAt),
-      }) as ChatMessagePreview
+      }) as ChatMessage
       : undefined,
   })) as ChatPreview[];
 }

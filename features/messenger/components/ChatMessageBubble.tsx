@@ -20,7 +20,6 @@ export default function ChatMessageBubble({ message, displaySenderName = true, o
   const [lineCount, setLineCount] = useState(0);
 
   const addLine = useMemo(() => {
-    console.log("fullWidth", fullWidth, "lastLineWidth", lastLineWidth, "metaWidth", metaWidth);
     return (fullWidth - lastLineWidth - 16) < metaWidth;
   }, [fullWidth, lastLineWidth, metaWidth]);
 
