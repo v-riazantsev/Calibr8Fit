@@ -7,11 +7,15 @@ import { ChatMessage } from "../types/chatMessage";
 
 type Props = {
   message: ChatMessage;
+  lastReadByOthersMessageSentAt?: Date;
   displaySenderName?: boolean;
-  onMessageRead?: (messageId: string) => void;
 };
 
-export default function ChatMessageBubble({ message, displaySenderName = true, onMessageRead }: Props) {
+export default function ChatMessageBubble({
+  message,
+  lastReadByOthersMessageSentAt = new Date(0),
+  displaySenderName = true
+}: Props) {
   const theme = useTheme();
 
   const [lastLineWidth, setLastLineWidth] = useState(0);
@@ -31,7 +35,7 @@ export default function ChatMessageBubble({ message, displaySenderName = true, o
 
       {message.isOwnMessage && (
         <DynamicIcon
-          name={message.isReadByOthers ? "check-all" : "check"}
+          name={message.sentAt <= lastReadByOthersMessageSentAt ? "check-all" : "check"}
           library="MaterialCommunityIcons"
           size={14}
           color={theme.primary}

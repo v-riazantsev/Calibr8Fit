@@ -95,6 +95,22 @@ export const MessengerProvider = ({
     });
   }
 
+  const updateLastReadByOtherMembersMessageSentAt = (chatId: string, sentAt: Date) => {
+    setChatPreviews(prev => {
+      const preview = prev[chatId];
+
+      if (!preview) return prev;
+
+      return {
+        ...prev,
+        [chatId]: {
+          ...preview,
+          lastReadByOtherMembersMessageSentAt: sentAt,
+        },
+      };
+    });
+  }
+
   // Keep preview's last message in sync with the messagesByChatId state
   useEffect(() => {
     for (const [chatId, messages] of Object.entries(messagesByChatId)) {
@@ -237,6 +253,10 @@ export const MessengerProvider = ({
     }
   };
 
+  const onMessageReadByOthers = (dto: any) => {
+    updateLastReadByOtherMembersMessageSentAt(dto.chatId, new Date(dto.fromMessageSentAt));
+  };
+
   const getLatestIncomingMessage = (
     messages: ChatMessage[]
   ): ChatMessage | undefined => {
@@ -310,6 +330,7 @@ export const MessengerProvider = ({
       await fetchChatPreviews();
 
       chatHubService.on("MessageIncoming", handler);
+      chatHubService.on("MessagesRead", onMessageReadByOthers);
 
       await chatHubService.connect();
       setIsConnected(true);

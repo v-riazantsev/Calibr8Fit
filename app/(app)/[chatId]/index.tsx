@@ -112,6 +112,7 @@ export default function Chat() {
         renderItem={({ item }) => (
           <ChatMessageBubble
             message={item}
+            lastReadByOthersMessageSentAt={currentChatPreview?.lastReadByOtherMembersMessageSentAt}
             displaySenderName={currentChatPreview?.isGroupChat && !item.isOwnMessage}
           />
         )}
