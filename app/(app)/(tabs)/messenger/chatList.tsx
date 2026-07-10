@@ -7,14 +7,9 @@ import { FlatList, StyleSheet } from "react-native";
 
 export default function ChatList() {
   const theme = useTheme();
-  const { chatPreviews, fetchChatPreviews: fetchChats, fetchChatMessages, sendMessage } = useMessenger();
+  const { chatPreviews, fetchChatPreviews: fetchChats } = useMessenger();
 
   const [refreshing, setRefreshing] = useState(false);
-
-  const handleLoadPage = useCallback(
-    (page: number, pageSize: number) => fetchChats(),
-    [fetchChats]
-  );
 
   const sortedChatPreviews = useMemo(() => {
     return Object.values(chatPreviews).sort((a, b) => {

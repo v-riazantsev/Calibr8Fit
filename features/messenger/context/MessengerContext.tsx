@@ -9,6 +9,7 @@ import { ChatMessage } from "../types/chatMessage";
 interface MessengerContextProps {
   isConnected: boolean;
 
+  getDirectChat: (username: string) => Promise<ChatPreview | undefined>;
   openChat: (chatId: string) => Promise<void>;
   closeChat: () => void;
 
@@ -133,6 +134,24 @@ export const MessengerProvider = ({
     );
 
     return fetchedChatsPreviews;
+  };
+
+  const getDirectChat = async (username: string): Promise<ChatPreview | undefined> => {
+    let directChat = Object.values(chatPreviews).find(chat => chat.directMember?.username === username);
+    if (!directChat) {
+      directChat = await chatService.getDirectChat(username);
+
+      setChatPreviews(prev => {
+        if (!directChat) return prev;
+
+        return {
+          ...prev,
+          [directChat.id]: directChat,
+        };
+      });
+    }
+
+    return directChat;
   };
 
   const updateUnreadCount = (chatId: string, change: number) => {
@@ -355,6 +374,7 @@ export const MessengerProvider = ({
 
         chatPreviews,
         currentChatPreview,
+        getDirectChat,
         fetchChatPreviews,
         currentChatMessages,
         fetchChatMessages,

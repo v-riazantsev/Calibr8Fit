@@ -1,3 +1,4 @@
+import { useMessenger } from "@/features/messenger/hooks/useMessegner";
 import { useFollowers, useFriends, usePosts, useUser } from "@/features/social";
 import PostCard from "@/features/social/components/PostCard";
 import PressableCount from "@/features/social/components/PressableCount";
@@ -25,6 +26,8 @@ export default function UserProfileScreen() {
     acceptFriendRequest,
     rejectFriendRequest,
   } = useFriends();
+
+  const { getDirectChat } = useMessenger();
 
   const { follow, unfollow } = useFollowers();
 
@@ -81,6 +84,17 @@ export default function UserProfileScreen() {
     await unfollow(username as string);
     updateUserProfile();
   }, [username, unfollow, updateUserProfile]);
+
+  const handleChatPress = useCallback(async () => {
+    const chat = await getDirectChat(username as string);
+
+    if (!chat) {
+      console.error("Failed to get or create direct chat with user:", username);
+      return;
+    }
+
+    router.push(`../../${chat.id}`);
+  }, [username, getDirectChat]);
 
   // Posts fetching
   const { getUserPosts } = usePosts();
@@ -236,7 +250,7 @@ export default function UserProfileScreen() {
           color: theme.onPrimaryVariant,
         }}
         style={[styles.fab, { backgroundColor: theme.primaryVariant }]}
-        onPress={() => {}}
+        onPress={handleChatPress}
       />
     </>
   );

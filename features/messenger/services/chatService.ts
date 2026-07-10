@@ -40,8 +40,6 @@ const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
     method: "GET",
   });
 
-  console.log("/chat response:", response);
-
   return response.map((dto: any) => mapChatPreviewDtoToChatPreview(dto));
 }
 
@@ -64,14 +62,26 @@ const fetchChatMessages = async (
     method: "GET",
   });
 
-  console.log(`/chat/messages?${query.toString()}, response:`, response.length);
-
   return response.map((dto: any) => mapChatMessageDtoToChatMessage(dto));
+}
+
+const getDirectChat = async (username: string): Promise<ChatPreview | undefined> => {
+  const response = await api.request({
+    endpoint: `/chat/direct/${username}/chat`,
+    method: "GET",
+  });
+
+  if (!response) {
+    return undefined;
+  }
+
+  return mapChatPreviewDtoToChatPreview(response);
 }
 
 export const chatService = {
   fetchChatPreviews,
   mapChatMessageDtoToChatMessage,
+  getDirectChat,
   //fetchDirectChatMessages,
   fetchChatMessages,
 };

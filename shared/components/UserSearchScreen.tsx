@@ -19,9 +19,10 @@ type LoadPage = (
 type Props = {
   loadPage: LoadPage;
   onUserPress?: (username: string) => void;
+  onChatPress?: (username: string) => void;
 };
 
-export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
+export default function UserSearchScreen({ loadPage, onUserPress, onChatPress }: Props) {
   const theme = useTheme();
 
   const [input, setInput] = useState("");
@@ -111,6 +112,7 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
                 size: 48,
               }}
               variant="icon"
+              onPress={() => onChatPress?.(item.username)}
             />
           </View>
         )}
