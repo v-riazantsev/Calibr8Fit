@@ -37,7 +37,7 @@ export default function ChatMessageBubble({
         <DynamicIcon
           name={message.sentAt <= lastReadByOthersMessageSentAt ? "check-all" : "check"}
           library="MaterialCommunityIcons"
-          size={14}
+          size={16}
           color={theme.primary}
         />
       )}

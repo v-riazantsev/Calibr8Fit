@@ -1,4 +1,5 @@
 import AppText from "@/shared/components/AppText";
+import DynamicIcon from "@/shared/components/DynamicIcon";
 import NotificationBadge from "@/shared/components/NotificationBadge";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ChatCard({ chatPreview, onPress }: Props) {
   const theme = useTheme();
+  const message = chatPreview.lastMessage;
 
   return (
     <TouchableOpacity
@@ -31,16 +33,25 @@ export default function ChatCard({ chatPreview, onPress }: Props) {
             ellipsizeMode="tail"
             style={styles.flex1}
           >{chatPreview.displayName}</AppText>
+          {message?.isOwnMessage && chatPreview.lastReadByOtherMembersMessageSentAt && (
+            <DynamicIcon
+              name={message.sentAt <= chatPreview.lastReadByOtherMembersMessageSentAt ? "check-all" : "check"}
+              library="MaterialCommunityIcons"
+              size={16}
+              color={theme.primary}
+            />
+          )}
           <AppText
             type="body-small"
-          >{chatPreview.lastMessage?.sentAt.toLocaleTimeString()}</AppText>
+          >{message?.sentAt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}</AppText>
         </View>
-        <View style={[styles.row, { justifyContent: "space-between" }]}>
+        <View style={styles.row}>
           <AppText
             type="body-medium"
             numberOfLines={1}
             ellipsizeMode="tail"
-          >{chatPreview.lastMessage?.content || "No messages yet."}
+            style={styles.flex1}
+          >{message?.content || "No messages yet."}
           </AppText>
           <NotificationBadge text={chatPreview.unreadMessagesCount > 0 ? chatPreview.unreadMessagesCount.toString() : undefined} />
         </View>

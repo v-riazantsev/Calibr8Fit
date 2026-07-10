@@ -11,6 +11,29 @@ const mapChatMessageDtoToChatMessage = (dto: any): ChatMessage => ({
   sentAt: new Date(dto.sentAt),
 });
 
+const mapChatPreviewDtoToChatPreview = (dto: any): ChatPreview => ({
+  ...dto,
+  createdAt: new Date(dto.createdAt),
+  lastReadByUserMessageSentAt:
+    dto.lastReadByUserMessageSentAt ? new Date(dto.lastReadByUserMessageSentAt) : undefined,
+  lastReadByOtherMembersMessageSentAt:
+    dto.lastReadByOtherMembersMessageSentAt ? new Date(dto.lastReadByOtherMembersMessageSentAt) : undefined,
+
+  lastMessage: dto.lastMessage
+    ? ({
+      ...dto.lastMessage,
+      sentAt: new Date(dto.lastMessage.sentAt),
+    }) as ChatMessage
+    : undefined,
+
+  directMember: dto.directMember
+    ? ({
+      ...dto.directMember,
+      username: dto.directMember.userName,
+    })
+    : undefined,
+});
+
 const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
   const response = await api.request({
     endpoint: "/chat",
@@ -19,35 +42,8 @@ const fetchChatPreviews = async (): Promise<ChatPreview[]> => {
 
   console.log("/chat response:", response);
 
-  return response.map((dto: any) => ({
-    ...dto,
-    createdAt: new Date(dto.createdAt),
-    lastReadByUserMessageSentAt:
-      dto.lastReadByUserMessageSentAt ? new Date(dto.lastReadByUserMessageSentAt) : undefined,
-    lastReadByOtherMembersMessageSentAt:
-      dto.lastReadByOtherMembersMessageSentAt ? new Date(dto.lastReadByOtherMembersMessageSentAt) : undefined,
-
-    lastMessage: dto.lastMessage
-      ? ({
-        ...dto.lastMessage,
-        sentAt: new Date(dto.lastMessage.sentAt),
-      }) as ChatMessage
-      : undefined,
-  })) as ChatPreview[];
+  return response.map((dto: any) => mapChatPreviewDtoToChatPreview(dto));
 }
-
-// const fetchDirectChatMessages = async (
-//   username: string,
-//   before: string,
-//   size: number = 100,
-// ): Promise<ChatMessage[]> => {
-//   const response = await api.request({
-//     endpoint: `/chat/direct/${encodeURIComponent(username)}?before=${encodeURIComponent(before)}&size=${size}`,
-//     method: "GET",
-//   });
-
-//   return response.map((dto: any) => mapChatMessageDtoToChatMessage(dto));
-// }
 
 const fetchChatMessages = async (
   chatId: string,

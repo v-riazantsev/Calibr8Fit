@@ -10,6 +10,7 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
+  TouchableOpacity,
   View
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
@@ -79,12 +80,24 @@ export default function Chat() {
     }
   };
 
+  const handleChatInfoPress = () => {
+    if (!chatId) return;
+
+    if (!currentChatPreview?.isGroupChat)
+      router.push(`../(tabs)/profile/${currentChatPreview?.directMember?.username}`);
+    else
+      router.push(`/messenger/chat/${chatId}/info`);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior="padding"
       style={{ flex: 1, backgroundColor: theme.surface }}
     >
-      <View style={[styles.headerRow, { borderColor: theme.outline }]}>
+      <TouchableOpacity
+        style={[styles.headerRow, { borderColor: theme.outline }]}
+        onPress={handleChatInfoPress}
+      >
         <IconButton
           icon={{
             name: "arrow-back",
@@ -102,7 +115,7 @@ export default function Chat() {
         <AppText type="title-large">
           {currentChatPreview?.displayName}
         </AppText>
-      </View>
+      </TouchableOpacity>
       <FlatList
         inverted
         style={{ flex: 1 }}
