@@ -13,7 +13,7 @@ import { WeightRecordProvider } from "@/features/weight/context/WeightRecordCont
 import DynamicIcon, { IconItem } from "@/shared/components/DynamicIcon";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { PlatformPressable } from "@react-navigation/elements";
-import { Tabs } from "expo-router";
+import { router, Tabs, usePathname } from "expo-router";
 import { StyleSheet } from "react-native";
 
 const screenConfigs: Record<string, IconItem> = {
@@ -26,6 +26,7 @@ const screenConfigs: Record<string, IconItem> = {
 
 export default function TabLayout() {
   const theme = useTheme();
+  const pathname = usePathname();
 
   return (
     <SocialProvider>
@@ -57,6 +58,17 @@ export default function TabLayout() {
                                   tabBarButton: (props) => (
                                     <PlatformPressable
                                       {...props}
+                                      onPress={(event) => {
+                                        if (
+                                          route.name === "profile" &&
+                                          pathname !== "/profile/myProfile"
+                                        ) {
+                                          router.navigate("/profile/myProfile");
+                                          return;
+                                        }
+
+                                        props.onPress?.(event);
+                                      }}
                                       android_ripple={{
                                         color: "transparent",
                                       }}

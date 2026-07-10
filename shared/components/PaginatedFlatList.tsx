@@ -46,12 +46,12 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
   const [loading, setLoading] = useState(false);
 
   const fetchPage = useCallback(
-    async (page: number) => {
+    async (page: number, replace = false) => {
       setLoading(true);
 
       const data = await loadPage(page, pageSize, args);
 
-      setItems((prev) => [...prev, ...data]);
+      setItems(prev => replace ? data : [...prev, ...data]);
       setHasMore(data.length === pageSize);
 
       setLoading(false);
@@ -69,18 +69,16 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
   // Refetch when args change
   useEffect(() => {
     setPage(0);
-    setItems([]);
-    fetchPage(0);
+    fetchPage(0, true);
   }, [args, fetchPage]);
 
   // Handle pull to refresh
   const handleRefresh = useCallback(async () => {
     setPage(0);
-    setItems([]);
-    await fetchPage(0);
-    setLoading(true);
+
+    await fetchPage(0, true);
+
     await props.onRefresh?.();
-    setLoading(false);
   }, [fetchPage, props]);
 
   const listFooter = useMemo(() => {
