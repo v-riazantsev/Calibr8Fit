@@ -106,7 +106,7 @@ export default function MonthLineChartCard({
         startOpacity={1}
         endFillColor={theme.surface}
         endOpacity={0}
-        xAxisLabelTextStyle={{ width: 20, marginLeft: 5 }}
+        xAxisLabelTextStyle={{ width: 20, marginLeft: 5, color: theme.onSurfaceVariant }}
         yAxisLabelSuffix={yAxisLabelSuffix}
         thickness={2}
         color={color}

@@ -58,7 +58,6 @@ const dailyDelta = (
   weight: number,
   targetWeight: number,
 ) => {
-  console.log("dailyDelta", weight, targetWeight);
   const diff = targetWeight - weight;
 
   if (diff === 0) return 0;

@@ -137,7 +137,7 @@ export default function Chat() {
       >
         <TextInput
           placeholder="Type a message..."
-          style={styles.input}
+          style={[styles.input, { color: theme.onSurface }]}
           value={input}
           onChangeText={setInput}
         />

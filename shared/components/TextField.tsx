@@ -141,7 +141,9 @@ const TextField = forwardRef<TextInput, Props>(
 
           <View style={styles.inputRow}>
             <TextInput
-              style={[Typography["body-large"], styles.textInput]}
+              style={[Typography["body-large"], styles.textInput, {
+                color: theme.onSurface,
+              }]}
               ref={ref}
               multiline={multiline}
               numberOfLines={numberOfLines}
