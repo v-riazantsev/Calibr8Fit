@@ -67,7 +67,7 @@ export function createSyncService<
         ...data,
         modifiedAt: Date.now(),
         id: Crypto.randomUUID(),
-      } as unknown as InferInsertModel<TTable>);
+      } as TTable["$inferInsert"]);
     } catch (error) {
       console.error("Failed to insert local data:", error);
       throw error;
@@ -84,7 +84,7 @@ export function createSyncService<
         .set({
           deleted: true,
           modifiedAt: Date.now(), // Update modifiedAt to current time
-        } as unknown as InferInsertModel<TTable>)
+        } as TTable["$inferInsert"])
         .where(eq((table as any).id, id));
     } catch (error) {
       console.error("Failed to mark local data as deleted:", error);

@@ -58,4 +58,6 @@ export const weightRecordService = {
     >,
   loadToday: () =>
     timeSeriesQueryService.loadToday() as Promise<WeightRecord[]>,
+  loadLast: () =>
+    timeSeriesQueryService.loadLast() as Promise<WeightRecord>,
 };

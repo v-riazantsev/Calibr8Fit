@@ -38,7 +38,7 @@ export const RecommendationsProvider = ({
     setRmr(getRMR());
     setBurnTarget(getBurnTarget());
     setConsumptionTarget(getConsumptionTarget());
-  }, [profileSettings]);
+  }, [profileSettings, weight]);
 
   const caloriesBurnedCalculator = useCallback(
     (met: number, minutes: number): number => {

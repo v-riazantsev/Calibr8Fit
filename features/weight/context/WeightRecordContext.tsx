@@ -34,6 +34,9 @@ export const WeightRecordProvider = ({
   const [todayWeightRecords, setTodayWeightRecords] = useState<WeightRecord[]>(
     [],
   );
+  const [lastWeightRecord, setLastWeightRecord] = useState<WeightRecord | null>(
+    null,
+  );
 
   // Sync weight records when the component mounts
   useEffect(() => {
@@ -44,9 +47,9 @@ export const WeightRecordProvider = ({
     setWeight(
       todayWeightRecords.length > 0
         ? todayWeightRecords[todayWeightRecords.length - 1].weight
-        : 0,
+        : lastWeightRecord?.weight ?? 0,
     );
-  }, [todayWeightRecords]);
+  }, [todayWeightRecords, lastWeightRecord]);
 
   const syncWeightRecords = async () => {
     await weightRecordService.sync();
@@ -72,6 +75,8 @@ export const WeightRecordProvider = ({
   const loadToday = async () => {
     const records = await weightRecordService.loadToday();
     setTodayWeightRecords(records);
+    const lastRecord = records.length > 0 ? records[records.length - 1] : await weightRecordService.loadLast();
+    setLastWeightRecord(lastRecord);
     return records;
   };
 

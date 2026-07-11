@@ -1,4 +1,4 @@
-import { and, gte, lt, SQL, TableRelationalConfig } from "drizzle-orm";
+import { and, desc, gte, lt, SQL, TableRelationalConfig } from "drizzle-orm";
 import { RelationalQueryBuilder } from "drizzle-orm/sqlite-core/query-builders/query";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -58,7 +58,7 @@ export function createTimeSeriesQueryService<
     for (const r of rows) {
       const day =
         Math.floor((((r as any).time as number) + LOCAL_OFFSET) / DAY_MS) *
-          DAY_MS -
+        DAY_MS -
         LOCAL_OFFSET;
 
       const raw = (r as any)[valueKey];
@@ -87,10 +87,25 @@ export function createTimeSeriesQueryService<
       )
     )[0].value;
 
+  const loadLast = async (): Promise<unknown> => {
+    const row = await qb.findFirst({
+      with: extraWith,
+      where: persistentFilter ?? and(),
+      orderBy: (table: any) => [desc(table.time)],
+      columns: {
+        time: true,
+        [valueKey]: true,
+      },
+    });
+
+    return row as unknown as Entity[];
+  }
+
   return {
     loadInTimeNumberRange,
     loadToday,
     loadDailyTotalInNumberRange,
     loadTodayTotal,
+    loadLast,
   };
 }

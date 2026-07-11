@@ -11,7 +11,6 @@ export interface ChatPreview {
   lastMessage?: ChatMessage;
 
   directMember?: UserSummary;
-  typingUsers: string[];
 
   lastReadByUserMessageSentAt?: Date;
   lastReadByOtherMembersMessageSentAt?: Date;
