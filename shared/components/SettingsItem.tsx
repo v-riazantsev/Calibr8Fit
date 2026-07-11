@@ -367,7 +367,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   underlinedValue: {
-    color: undefined,
     textDecorationLine: "underline",
   },
   textCenter: {
