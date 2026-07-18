@@ -22,6 +22,7 @@ const syncService = createSyncService<
   endpoint: "/water-intake",
   collectionKey: "waterIntakeRecords",
   mapRemoteArrayToLocal: async (remote) =>
+    // Normalize server field names and timestamps for local storage.
     remote.map(({ amountInMilliliters, ...record }) => ({
       ...record,
       amountInMl: amountInMilliliters,
@@ -29,6 +30,7 @@ const syncService = createSyncService<
       modifiedAt: new Date(record.modifiedAt).getTime(),
     })),
   mapLocalArrayToRemote: async (local) =>
+    // Convert local timestamps back to ISO strings before sync.
     local.map(({ amountInMl, ...record }) => ({
       ...record,
       amountInMilliliters: amountInMl,

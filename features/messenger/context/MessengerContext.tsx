@@ -192,6 +192,7 @@ export const MessengerProvider = ({
   ): ChatMessage[] => {
     const byId = new Map<string, ChatMessage>();
 
+    // Prefer the latest copy of each message when reconciling updates.
     for (const message of current) {
       byId.set(message.id, message);
     }
@@ -241,6 +242,7 @@ export const MessengerProvider = ({
     chatId: string,
     fromMessage: ChatMessage
   ): Promise<ChatReadDto | undefined> => {
+    // Skip reads we already know about or that were sent by us.
     if (fromMessage.isOwnMessage || fromMessage.sentAt <= (chatPreviews[chatId]?.lastReadByUserMessageSentAt || new Date(0)))
       return undefined;
 
@@ -260,6 +262,7 @@ export const MessengerProvider = ({
   const onMessageIncoming = async (message: ChatMessage) => {
     const isActiveChat = activeChatIdRef.current === message.chatId;
 
+    // Store first, then decide whether to mark it read or unread.
     addMessagesToChat(message.chatId, [message]);
 
     if (isActiveChat && !message.isOwnMessage) {

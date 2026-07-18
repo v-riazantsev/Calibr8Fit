@@ -34,6 +34,7 @@ export const RecommendationsProvider = ({
   const [consumptionTarget, setConsumptionTarget] = useState<number>(0);
 
   useEffect(() => {
+    // Recompute recommendations whenever profile or weight changes.
     setWaterIntakeTarget(getWaterIntake());
     setRmr(getRMR());
     setBurnTarget(getBurnTarget());
@@ -56,6 +57,7 @@ export const RecommendationsProvider = ({
     new Date(profileSettings?.dateOfBirth ?? new Date()).getFullYear();
 
   const getRMR = (): number => {
+    // Use the profile defaults until the user finishes setup.
     return recommendationsService.rmrCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
@@ -66,6 +68,7 @@ export const RecommendationsProvider = ({
   };
 
   const getWaterIntake = (): number => {
+    // Fall back to temperate climate when the profile has no climate yet.
     return recommendationsService.waterCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
@@ -75,6 +78,7 @@ export const RecommendationsProvider = ({
   };
 
   const getBurnTarget = (): number => {
+    // Translate goal weight into a daily burn target.
     return recommendationsService.burningCalculator(
       weight,
       profileSettings?.targetWeight || 0,
@@ -82,6 +86,7 @@ export const RecommendationsProvider = ({
   };
 
   const getConsumptionTarget = (): number => {
+    // Keep the calorie target aligned with the current profile assumptions.
     return recommendationsService.consumptionCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,

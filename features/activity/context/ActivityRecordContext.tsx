@@ -51,6 +51,7 @@ export const ActivityRecordProvider = ({
   const addActivityRecord = async (
     record: Omit<InferInsertModel<typeof activityRecords>, "id" | "modifiedAt">,
   ) => {
+    // Optimistically add the new record before the backend round trip.
     setTodayRecords((prevRecords) => [
       ...prevRecords,
       {
@@ -63,6 +64,7 @@ export const ActivityRecordProvider = ({
   };
 
   const deleteActivityRecord = async (id: string) => {
+    // Remove the record locally first so the list feels immediate.
     setTodayRecords((prevRecords) =>
       prevRecords.filter((record) => record.id !== id),
     );
@@ -87,6 +89,7 @@ export const ActivityRecordProvider = ({
   };
 
   const todayActivityCaloriesBurned = (activityId: string) =>
+    // Sum both built-in and custom activities under the same identifier.
     todayRecords
       .filter(
         (record) =>

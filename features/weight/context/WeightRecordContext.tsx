@@ -57,6 +57,7 @@ export const WeightRecordProvider = ({
   };
 
   const addWeightRecord = async (record: { time: number; weight: number }) => {
+    // Optimistically update the latest weight before persisting it.
     setTodayWeightRecords((prevRecords) => [
       ...prevRecords,
       {
@@ -75,6 +76,7 @@ export const WeightRecordProvider = ({
   const loadToday = async () => {
     const records = await weightRecordService.loadToday();
     setTodayWeightRecords(records);
+    // Fall back to the last saved record when there is no entry for today.
     const lastRecord = records.length > 0 ? records[records.length - 1] : await weightRecordService.loadLast();
     setLastWeightRecord(lastRecord);
     return records;

@@ -160,6 +160,7 @@ export function createSyncService<
       // Insert new/updated entries
       if (inserts.length) await upsert(inserts);
 
+      // Persist the server's sync timestamp after local updates land.
       await syncTimeService.setLastSyncTimeMilliseconds(
         entityType,
         new Date(response.lastSyncedAt).getTime(),

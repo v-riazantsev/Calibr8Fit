@@ -62,6 +62,7 @@ export default function Chat() {
   }, [chatId, sendChatMessage]);
 
   const loadOlderMessages = useCallback(async () => {
+    // The list is inverted, so reaching the end means we need older messages.
     if (
       !chatId ||
       loadingOlder ||

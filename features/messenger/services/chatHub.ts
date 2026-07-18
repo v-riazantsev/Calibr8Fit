@@ -7,6 +7,7 @@ const chatHub = createHub({ endpoint: "/chat" });
 
 const sendChatMessage = async (request: SendChatMessageRequestDto): Promise<ChatMessage> => {
   const response = await chatHub.invoke("SendChatMessage", request);
+  // Normalize the hub response to the app's ChatMessage shape.
   return chatService.mapChatMessageDtoToChatMessage(response);
 }
 

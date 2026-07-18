@@ -52,6 +52,7 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
       const data = await loadPage(page, pageSize, args);
 
       setItems(prev => replace ? data : [...prev, ...data]);
+      // A short page means we reached the end.
       setHasMore(data.length === pageSize);
 
       setLoading(false);

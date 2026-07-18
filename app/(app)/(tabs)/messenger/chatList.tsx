@@ -12,6 +12,7 @@ export default function ChatList() {
   const [refreshing, setRefreshing] = useState(false);
 
   const sortedChatPreviews = useMemo(() => {
+    // Keep the most recently active chats at the top of the list.
     return Object.values(chatPreviews).sort((a, b) => {
       const aLastMessageTime = new Date(a.lastMessage?.sentAt ?? 0).getTime();
       const bLastMessageTime = new Date(b.lastMessage?.sentAt ?? 0).getTime();

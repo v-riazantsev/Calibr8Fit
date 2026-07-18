@@ -2,25 +2,27 @@ import { api } from "@/shared/services/api";
 import { Post, PostComment, PostImage } from "../types/post";
 
 const responseToPost = (response: any): Post =>
-  ({
-    ...response,
-    author: {
-      ...response.author,
-      username: response.author.userName,
-    },
-    createdAt: new Date(response.createdAt),
-    likedByMe: response.isLikedByCurrentUser,
-  } as Post);
+// Map the API shape into the app's post model.
+({
+  ...response,
+  author: {
+    ...response.author,
+    username: response.author.userName,
+  },
+  createdAt: new Date(response.createdAt),
+  likedByMe: response.isLikedByCurrentUser,
+} as Post);
 
 const responseToComment = (response: any): PostComment =>
-  ({
-    ...response,
-    author: {
-      ...response.author,
-      username: response.author.userName,
-    },
-    createdAt: new Date(response.createdAt),
-  } as PostComment);
+// Map the API shape into the app's comment model.
+({
+  ...response,
+  author: {
+    ...response.author,
+    username: response.author.userName,
+  },
+  createdAt: new Date(response.createdAt),
+} as PostComment);
 
 const getMyPosts = async (page: number, pageSize: number) => {
   const response = await api.request({

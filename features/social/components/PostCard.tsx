@@ -68,6 +68,7 @@ export default function PostCard({
     setModalOpen(true);
   }, []);
 
+  // Render a compact collage when the post has more than one image.
   const Images = useMemo(() => {
     if (imageUrls.length === 0) return null;
 

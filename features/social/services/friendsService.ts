@@ -11,6 +11,7 @@ const searchUserFriends = async (
     endpoint: `/friendship/${encodeURIComponent(username)}/friends/search?query=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`,
     method: "GET",
   });
+  // Flatten the nested friend payload to the shared summary shape.
   return response.map((dto: any) => ({
     ...dto.friend,
     username: dto.friend.userName,
@@ -24,6 +25,7 @@ const getPendingFriendRequests = async (): Promise<
     endpoint: "/friendship/requests/pending",
     method: "GET",
   });
+  // Convert the server request DTO into the UI-friendly request list.
   return response.map((request: any) => ({
     requester: {
       ...request.requester,
@@ -38,6 +40,7 @@ const sendFriendRequest = async (username: string): Promise<FriendRequest> => {
     endpoint: `/friendship/request/${encodeURIComponent(username)}`,
     method: "POST",
   });
+  // Normalize the response date for local display and sorting.
   return {
     requester: response.requester,
     receiver: response.receiver,

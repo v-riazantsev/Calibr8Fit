@@ -38,6 +38,7 @@ export default function UserSearchScreen({ loadPage, onUserPress, onChatPress }:
   const handleTextChange = useCallback(
     (text: string) => {
       setInput(text);
+      // Wait for typing to settle before changing the paginated query.
       onDebouncedQueryChange(text);
     },
     [onDebouncedQueryChange],

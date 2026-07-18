@@ -28,6 +28,7 @@ export default function PostCommentsModal({
 
   const { getPostComments, addComment } = usePosts();
   const [refreshKey, setRefreshKey] = useState(0);
+  // Bump the key so the paginated list reloads after adds and deletes.
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   const [input, setInput] = useState("");

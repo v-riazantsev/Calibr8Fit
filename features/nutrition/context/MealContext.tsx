@@ -37,6 +37,7 @@ export const MealProvider = (
 
   const syncMeals = async () => {
     await mealService.sync();
+    // Reload after sync so the UI reflects remote changes immediately.
     loadMeals();
   };
 

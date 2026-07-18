@@ -40,6 +40,7 @@ const syncService = createSyncService<
 
     return remote.map((record) => ({
       ...record,
+      // Keep custom activities when the record no longer points to a built-in one.
       activityId: activitiesIdSet.has(record.activityId)
         ? record.activityId
         : null,

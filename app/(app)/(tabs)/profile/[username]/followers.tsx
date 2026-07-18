@@ -11,6 +11,7 @@ export default function Followers() {
   const { searchFollowers } = useFollowers();
 
   const handleUserPress = useCallback(async (username: string) => {
+    // Open the current user's own profile instead of a duplicate route.
     if (username === profileSettings?.userName)
       router.push('/profile/myProfile');
     else

@@ -37,6 +37,7 @@ export const WaterIntakeProvider = ({
 
   const syncWaterIntake = useCallback(async () => {
     await waterIntakeService.sync();
+    // Reload after sync so the daily total reflects remote updates.
     loadToday();
   }, []);
 
@@ -60,6 +61,7 @@ export const WaterIntakeProvider = ({
   }) => {
     console.log("Adding water intake record:", record);
     await waterIntakeService.add(record);
+    // Re-read today's records after inserting a new entry.
     loadToday();
   };
 

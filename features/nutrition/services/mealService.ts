@@ -206,6 +206,7 @@ const syncService = createSyncService<
     modifiedAt: sql.raw(`excluded.${userMeals.modifiedAt.name}`),
     deleted: sql.raw(`excluded.${userMeals.deleted.name}`),
   },
+  // Meals need a custom merge because ingredients live in a separate table.
   customUpsert: upsert,
   customModifiedSince: getModifiedSince,
 });

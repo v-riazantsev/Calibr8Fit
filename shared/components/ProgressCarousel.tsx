@@ -112,9 +112,11 @@ export default function ProgressCarousel() {
       });
     }
 
+    // Flip back to chronological order for the carousel.
     result.reverse();
 
     const tomorrowDate = new Date().setDate(new Date().getDate() + 1);
+    // Keep one empty slot at the end so the last real day stays aligned.
     result.push({
       waterProgress: 0,
       burnProgress: 0,

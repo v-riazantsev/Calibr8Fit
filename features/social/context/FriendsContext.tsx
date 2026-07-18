@@ -101,6 +101,7 @@ export const FriendsProvider = ({
       await friendsService.acceptFriendRequest(username);
       // Optimistically update the list
       removeUserFromPending(username);
+      // Keep the profile badge in sync with the accepted request.
       changeFriendsCount(1); // Update profile friends count
     } catch (error) {
       console.error("Failed to accept friend request:", error);
@@ -122,6 +123,7 @@ export const FriendsProvider = ({
   const removeFriend = async (username: string) => {
     try {
       await friendsService.removeFriend(username);
+      // Keep the profile badge in sync with the removed friend.
       changeFriendsCount(-1); // Update profile friends count
     } catch (error) {
       console.error("Failed to remove friend:", error);

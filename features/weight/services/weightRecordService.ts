@@ -22,12 +22,14 @@ const syncService = createSyncService<
   endpoint: "/weight",
   collectionKey: "weightRecords",
   mapRemoteArrayToLocal: async (remote) =>
+    // Keep remote timestamps in the local numeric format.
     remote.map((record) => ({
       ...record,
       time: new Date(record.time).getTime(),
       modifiedAt: new Date(record.modifiedAt).getTime(),
     })),
   mapLocalArrayToRemote: async (local) =>
+    // Convert local timestamps back to ISO strings before sync.
     local.map((record) => ({
       ...record,
       time: new Date(record.time).toISOString(),

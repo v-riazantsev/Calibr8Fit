@@ -16,6 +16,7 @@ export default function DailyBurnProgressList() {
   const { todayActivityCaloriesBurned } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
+  // Flatten the configured targets into display rows with live progress.
   const minimalTargets = useMemo(
     () =>
       targets.map((t) => ({
@@ -41,6 +42,7 @@ export default function DailyBurnProgressList() {
   );
 
   const progress = useMemo(() => {
+    // A zero target means there is nothing to track yet.
     if (todayCaloriesTarget === 0) return 1;
     return Math.min(todayCaloriesBurned / todayCaloriesTarget, 1);
   }, [todayCaloriesBurned, todayCaloriesTarget]);

@@ -23,6 +23,7 @@ function ChatMessageBubble({
   const [metaWidth, setMetaWidth] = useState(0);
   const [lineCount, setLineCount] = useState(0);
 
+  // Reserve room for the timestamp/check row when the last line is too wide.
   const addLine = fullWidth - lastLineWidth - 16 < metaWidth;
 
   const formattedTime = useMemo(
