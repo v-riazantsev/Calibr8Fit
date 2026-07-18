@@ -5,7 +5,6 @@ import PressableCount from "@/features/social/components/PressableCount";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
 import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
-import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -18,8 +17,6 @@ export default function MyProfile() {
   const { currentUser, fetchCurrentUserProfile } = useUser();
   const { pendingFriendRequests } = useFriends();
   const { getMyPosts } = usePosts();
-
-  const { logout } = useAuth();
 
   const handleRefresh = useCallback(async () => {
     await fetchCurrentUserProfile();

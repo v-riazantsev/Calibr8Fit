@@ -5,21 +5,24 @@ import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+
+const PAGE_SIZE = 50;
 
 export default function Chat() {
   const theme = useTheme();
   const { chatId } = useLocalSearchParams<{ chatId: string }>();
 
   const [input, setInput] = useState("");
+  const inputRef = useRef("");
 
   const {
     currentChatMessages,
@@ -27,7 +30,7 @@ export default function Chat() {
     closeChat,
     fetchChatMessages,
     sendChatMessage,
-    currentChatPreview
+    currentChatPreview,
   } = useMessenger();
 
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -39,29 +42,36 @@ export default function Chat() {
     setHasMoreOlder(true);
     openChat(chatId);
 
-    return () => {
-      closeChat();
-    };
-  }, [chatId]);
+    return closeChat;
+  }, [chatId, openChat, closeChat]);
 
-  const handleSendMessage = useCallback(async (content: string) => {
-    if (!chatId) return;
+  const handleInputChange = useCallback((text: string) => {
+    inputRef.current = text;
+    setInput(text);
+  }, []);
 
+  const handleSendMessage = useCallback(async () => {
+    const trimmed = inputRef.current.trim();
+
+    if (!trimmed || !chatId) return;
+
+    inputRef.current = "";
     setInput("");
 
-    await sendChatMessage(chatId, content);
+    await sendChatMessage(chatId, trimmed);
   }, [chatId, sendChatMessage]);
 
-  const invertedMessages = useMemo(() => {
-    return [...currentChatMessages].reverse();
-  }, [currentChatMessages]);
-
-  const loadOlderMessages = async () => {
-    if (!chatId || loadingOlder || !hasMoreOlder) return;
+  const loadOlderMessages = useCallback(async () => {
+    if (
+      !chatId ||
+      loadingOlder ||
+      !hasMoreOlder ||
+      currentChatMessages.length === 0
+    ) {
+      return;
+    }
 
     const oldestMessage = currentChatMessages[0];
-
-    if (!oldestMessage) return;
 
     setLoadingOlder(true);
 
@@ -69,108 +79,165 @@ export default function Chat() {
       const olderMessages = await fetchChatMessages(
         chatId,
         oldestMessage.id,
-        50
+        PAGE_SIZE
       );
 
-      if (olderMessages.length < 50) {
+      if (olderMessages.length < PAGE_SIZE) {
         setHasMoreOlder(false);
       }
     } finally {
       setLoadingOlder(false);
     }
-  };
+  }, [
+    chatId,
+    loadingOlder,
+    hasMoreOlder,
+    currentChatMessages,
+    fetchChatMessages,
+  ]);
 
-  const handleChatInfoPress = () => {
+  const handleChatInfoPress = useCallback(() => {
     if (!chatId) return;
 
-    if (!currentChatPreview?.isGroupChat)
-      router.push(`../(tabs)/profile/${currentChatPreview?.directMember?.username}`);
-    else
-      router.push(`/messenger/chat/${chatId}/info`);
-  };
+    if (!currentChatPreview?.isGroupChat) {
+      const username = currentChatPreview?.directMember?.username;
+
+      if (username) {
+        router.push(`../(tabs)/profile/${username}`);
+      }
+
+      return;
+    }
+
+    router.push(`/messenger/chat/${chatId}/info`);
+  }, [chatId, currentChatPreview]);
+
+  const invertedMessages = useMemo(
+    () => [...currentChatMessages].reverse(),
+    [currentChatMessages]
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: (typeof currentChatMessages)[number] }) => (
+      <ChatMessageBubble
+        message={item}
+        lastReadByOthersMessageSentAt={
+          currentChatPreview?.lastReadByOtherMembersMessageSentAt
+        }
+        displaySenderName={
+          currentChatPreview?.isGroupChat && !item.isOwnMessage
+        }
+      />
+    ),
+    [
+      currentChatPreview?.lastReadByOtherMembersMessageSentAt,
+      currentChatPreview?.isGroupChat,
+    ]
+  );
+
+  const backButton = useCallback(() => {
+    router.back();
+  }, []);
 
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      style={{ flex: 1, backgroundColor: theme.surface }}
+      style={[
+        styles.screen,
+        { backgroundColor: theme.surface },
+      ]}
     >
       <TouchableOpacity
-        style={[styles.headerRow, { borderColor: theme.outline }]}
+        style={[
+          styles.headerRow,
+          { borderColor: theme.outline },
+        ]}
         onPress={handleChatInfoPress}
       >
         <IconButton
-          icon={{
-            name: "arrow-back",
-            library: "MaterialIcons",
-            size: 32,
-          }}
+          icon={BACK_ICON}
           variant="icon"
-          onPress={router.back}
+          onPress={backButton}
         />
+
         <Image
-          source={{ uri: currentChatPreview?.avatarUrl }}
+          source={{
+            uri: currentChatPreview?.avatarUrl,
+          }}
           placeholder={require("@/assets/images/avatar-placeholder.png")}
           style={styles.avatar}
         />
+
         <AppText type="title-large">
           {currentChatPreview?.displayName}
         </AppText>
       </TouchableOpacity>
+
       <FlatList
         inverted
-        style={{ flex: 1 }}
+        style={styles.list}
         contentContainerStyle={styles.container}
         data={invertedMessages}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ChatMessageBubble
-            message={item}
-            lastReadByOthersMessageSentAt={currentChatPreview?.lastReadByOtherMembersMessageSentAt}
-            displaySenderName={currentChatPreview?.isGroupChat && !item.isOwnMessage}
-          />
-        )}
+        renderItem={renderItem}
         onEndReached={loadOlderMessages}
-        refreshing={loadingOlder}
+        onEndReachedThreshold={0.2}
+        keyboardShouldPersistTaps="handled"
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 1,
+        }}
+        ListFooterComponent={
+          loadingOlder ? <View style={styles.loader} /> : null
+        }
       />
-      <View
-        style={styles.inputRow}
-      >
+
+      <View style={styles.inputRow}>
         <TextInput
           placeholder="Type a message..."
-          style={[styles.input, { color: theme.onSurface }]}
+          style={[
+            styles.input,
+            { color: theme.onSurface },
+          ]}
           value={input}
-          onChangeText={setInput}
+          onChangeText={handleInputChange}
         />
+
         <IconButton
-          icon={{
-            name: "send",
-            library: "MaterialIcons",
-            size: 24,
-          }}
-          onPress={() => handleSendMessage(input)}
+          icon={SEND_ICON}
+          onPress={handleSendMessage}
         />
       </View>
     </KeyboardAvoidingView>
   );
 }
 
+const BACK_ICON = {
+  name: "arrow-back",
+  library: "MaterialIcons",
+  size: 32,
+} as const;
+
+const SEND_ICON = {
+  name: "send",
+  library: "MaterialIcons",
+  size: 24,
+} as const;
+
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+
+  list: {
+    flex: 1,
+  },
+
   container: {
     flexGrow: 1,
     gap: 8,
     paddingHorizontal: 4,
   },
-  messageBubble: {
-    padding: 8,
-  },
-  loader: {
-    paddingVertical: 12,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   headerRow: {
     flexDirection: "row",
     padding: 8,
@@ -178,6 +245,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderBottomWidth: 1,
   },
+
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -185,16 +253,23 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 8,
   },
+
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 8,
+    paddingHorizontal: 8,
   },
+
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
     marginLeft: 8,
+  },
+
+  loader: {
+    height: 20,
   },
 });

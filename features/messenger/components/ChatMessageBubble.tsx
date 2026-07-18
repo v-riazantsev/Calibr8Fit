@@ -1,8 +1,8 @@
 import AppText from "@/shared/components/AppText";
 import DynamicIcon from "@/shared/components/DynamicIcon";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { memo, useMemo, useState } from "react";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { ChatMessage } from "../types/chatMessage";
 
 type Props = {
@@ -11,10 +11,10 @@ type Props = {
   displaySenderName?: boolean;
 };
 
-export default function ChatMessageBubble({
+function ChatMessageBubble({
   message,
   lastReadByOthersMessageSentAt = new Date(0),
-  displaySenderName = true
+  displaySenderName = true,
 }: Props) {
   const theme = useTheme();
 
@@ -23,73 +23,124 @@ export default function ChatMessageBubble({
   const [metaWidth, setMetaWidth] = useState(0);
   const [lineCount, setLineCount] = useState(0);
 
-  const addLine = useMemo(() => {
-    return (fullWidth - lastLineWidth - 16) < metaWidth;
-  }, [fullWidth, lastLineWidth, metaWidth]);
+  const addLine = fullWidth - lastLineWidth - 16 < metaWidth;
 
-  const meta = (
-    <View style={styles.metaRow}>
-      <AppText type="label-small" style={{ color: theme.onSurfaceVariant, paddingHorizontal: 2 }}>
-        {message.sentAt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
-      </AppText>
-
-      {message.isOwnMessage && (
-        <DynamicIcon
-          name={message.sentAt <= lastReadByOthersMessageSentAt ? "check-all" : "check"}
-          library="MaterialCommunityIcons"
-          size={16}
-          color={theme.primary}
-        />
-      )}
-    </View>
+  const formattedTime = useMemo(
+    () =>
+      message.sentAt.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [message.sentAt]
   );
+
+  const handleContainerLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+
+    setFullWidth((prev) => (prev === width ? prev : width));
+  };
+
+  const handleMetaLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+
+    setMetaWidth((prev) => (prev === width ? prev : width));
+  };
+
+  const handleTextLayout = (event: any) => {
+    const lines = event.nativeEvent.lines;
+
+    const lastLineWidth = lines.at(-1)?.width ?? 0;
+
+    setLineCount((prev) =>
+      prev === lines.length ? prev : lines.length
+    );
+
+    setLastLineWidth((prev) =>
+      prev === lastLineWidth ? prev : lastLineWidth
+    );
+  };
+
+  const isOwnMessage = message.isOwnMessage;
 
   return (
     <View
-      style={[styles.container, {
-        marginLeft: message.isOwnMessage ? 64 : 0,
-        marginRight: message.isOwnMessage ? 0 : 64,
-        alignItems: message.isOwnMessage ? "flex-end" : "flex-start",
-      }]}
-      onLayout={(event) => {
-        setFullWidth(event.nativeEvent.layout.width);
-      }}
+      style={[
+        styles.container,
+        {
+          marginLeft: isOwnMessage ? 64 : 0,
+          marginRight: isOwnMessage ? 0 : 64,
+          alignItems: isOwnMessage ? "flex-end" : "flex-start",
+        },
+      ]}
+      onLayout={handleContainerLayout}
     >
-      <View style={[styles.bubble, { backgroundColor: theme.primaryVariant }]}>
+      <View
+        style={[
+          styles.bubble,
+          {
+            backgroundColor: theme.primaryVariant,
+          },
+        ]}
+      >
         {displaySenderName && (
-          <AppText type="body-medium-bold" style={{ color: theme.onPrimaryVariant }}>
+          <AppText
+            type="body-medium-bold"
+            style={{
+              color: theme.onPrimaryVariant,
+            }}
+          >
             {message.sender.username}
           </AppText>
         )}
+
         <AppText
           type="body-medium"
           style={{
             color: theme.onSurface,
-            paddingRight: lineCount === 1 && !addLine ? metaWidth : 0,
+            paddingRight:
+              lineCount === 1 && !addLine ? metaWidth : 0,
             paddingBottom: addLine ? 12 : 0,
           }}
-          onTextLayout={async (event) => {
-            const lines = event.nativeEvent.lines;
-            const lastLine = lines[lines.length - 1];
-
-            setLineCount(lines.length);
-            setLastLineWidth(lastLine.width);
-          }}
+          onTextLayout={handleTextLayout}
         >
           {message.content}
         </AppText>
+
         <View
           style={styles.metaContainer}
-          onLayout={(event) => {
-            setMetaWidth(event.nativeEvent.layout.width);
-          }}
+          onLayout={handleMetaLayout}
         >
-          {meta}
+          <View style={styles.metaRow}>
+            <AppText
+              type="label-small"
+              style={{
+                color: theme.onSurfaceVariant,
+                paddingHorizontal: 2,
+              }}
+            >
+              {formattedTime}
+            </AppText>
+
+            {isOwnMessage && (
+              <DynamicIcon
+                name={
+                  message.sentAt <= lastReadByOthersMessageSentAt
+                    ? "check-all"
+                    : "check"
+                }
+                library="MaterialCommunityIcons"
+                size={16}
+                color={theme.primary}
+              />
+            )}
+          </View>
         </View>
       </View>
     </View>
   );
 }
+
+export default memo(ChatMessageBubble);
 
 const styles = StyleSheet.create({
   container: {
